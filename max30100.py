@@ -89,9 +89,9 @@ class MAX30100(object):
     def __init__(self,
                  i2c=None,
                  mode=MODE_HR,
-                 sample_rate=100,
-                 led_current_red=11.0,
-                 led_current_ir=11.0,
+                 sample_rate=400,
+                 led_current_red=50.0,
+                 led_current_ir=50.0,
                  pulse_width=1600,
                  max_buffer_len=10000
                  ):
