@@ -1,29 +1,20 @@
 import time
-from max30100 import MAX30100  
+import max30100
 
-def main():
-    sensor1 = MAX30100(mode=0x03)  # SPO2 mode
-    sensor2 = MAX30100(mode=0x02)  # HR mode
+mx30 = max30100.MAX30100()
+mx30.enable_spo2()
 
-    print("MAX30100 initialized. Reading sensor data...\n")
-    try:
-        while True:
-            num_samples = sensor1.get_number_of_samples()
+while 1:
+    mx30.read_sensor()
 
-            for _ in range(num_samples):
-                sensor1.read_sensor()
-                sensor2.read_sensor()
-                ir_value = sensor2.ir
-                red_value = sensor1.red
-                print(f"IR (Heart rate): {ir_value}, RED (SpO₂): {red_value}")
-            
-            time.sleep(1)
+    mx30.ir, mx30.red
 
-    except KeyboardInterrupt:
-        print("\nExiting...")
-        sensor1.shutdown()
-        sensor2.shutdown()
+    hb = int(mx30.ir / 100)
+    spo2 = int(mx30.red / 100)
+    
+    if mx30.ir != mx30.buffer_ir :
+        print("Pulse:",hb)
+    if mx30.red != mx30.buffer_red:
+        print("SPO2:",spo2)
 
-
-if __name__ == "__main__":
-    main()
+    time.sleep(2)
