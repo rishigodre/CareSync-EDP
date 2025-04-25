@@ -92,7 +92,7 @@ class MAX30100(object):
                  sample_rate=400,
                  led_current_red=50.0,
                  led_current_ir=50.0,
-                 pulse_width=1600,
+                 pulse_width=400,
                  max_buffer_len=10000
                  ):
 
@@ -171,7 +171,7 @@ class MAX30100(object):
         self.i2c.write_byte_data(I2C_ADDRESS, MODE_CONFIG, reg | (1 << 3))
 
     def get_temperature(self):
-        intg = _twos_complement(self.i2c.read_byte_data(I2C_ADDRESS, TEMP_INTG))
+        intg = _twos_complement(self.i2c.read_byte_data(I2C_ADDRESS, TEMP_INTG), 16)
         frac = self.i2c.read_byte_data(I2C_ADDRESS, TEMP_FRAC)
         return intg + (frac * 0.0625)
 
