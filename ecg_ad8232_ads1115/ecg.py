@@ -1,35 +1,31 @@
-import RPi.GPIO as GPIO
-
-GPIO.setmode(GPIO.BCM)
-
-# setting pins 14 and 15 as input for AD8232
-GPIO.setup(14, GPIO.IN)
-GPIO.setup(15, GPIO.IN)
-
 import time
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from adafruit_ads1x15.ads1115 import ADS1115
-from adafruit_ads1x15.analog_in import AnalogIn
 import board
 import busio
-import adafruit_ads1x15.ads
+from adafruit_ads1x15.ads1115 import ADS1115
+from adafruit_ads1x15.analog_in import AnalogIn
+from gpiozero import DigitalInputDevice
+
+# Setup gpiozero for LO+ and LO- pins
+lo_plus = DigitalInputDevice(14)  # GPIO14 (Pin 8)
+lo_minus = DigitalInputDevice(15)  # GPIO15 (Pin 10)
 
 # Initialize I2C bus
 i2c = busio.I2C(board.SCL, board.SDA)
 
-# Initialize ADC
+# Initialize ADS1115 ADC
 ads = ADS1115(i2c)
-ads.gain = 1  # You can adjust gain based on your signal range
+ads.gain = 1  # Gain of 1x (±4.096V range)
 
-# Choose channel 0
-chan = AnalogIn(ads, adafruit_ads1x15.ads.P0)
+# Setup channel (direct integer 0 means A0 pin)
+chan = AnalogIn(ads, 0)
 
 # Set up plot
 fig, ax = plt.subplots()
 x_len = 200         # Number of points to display
-y_range = 32768     # ADS1115 is a 16-bit ADC
+y_range = 32768     # 16-bit ADC range
 xs = list(range(0, x_len))
 ys = [0] * x_len
 line, = ax.plot(xs, ys)
@@ -38,23 +34,23 @@ ax.set_title('Real-Time ECG Signal')
 ax.set_xlabel('Samples')
 ax.set_ylabel('ADC Value')
 
-# This function is called periodically from FuncAnimation
+# Animate function
 def animate(i, ys):
-    # Read the ECG value
-    ecg_value = chan.value
+    if lo_plus.value == 1 or lo_minus.value == 1:
+        ecg_value = 0
+        print("Lead off detected!")
+    else:
+        ecg_value = chan.value  # RAW ADC counts (-32768 to +32767)
 
-    # Add new reading and remove the oldest one
     ys.append(ecg_value)
     ys = ys[-x_len:]
 
-    # Update the line
     line.set_ydata(ys)
 
     return line,
 
-# Set up plot to call animate() function periodically
+# Set up live animation
 ani = animation.FuncAnimation(fig, animate, fargs=(ys,), interval=10, blit=True)
 
+# Show plot
 plt.show()
-
-
