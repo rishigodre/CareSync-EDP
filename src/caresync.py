@@ -1,5 +1,5 @@
 import time
-from max30100 import max30
+from max30100 import MAX30100
 import numpy as np
 from collections import deque
 import board
