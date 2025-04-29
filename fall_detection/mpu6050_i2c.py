@@ -1,12 +1,8 @@
 #########################################
-# Copyright (c) 2020 Maker Portal LLC
-# Author: Joshua Hrisko
-#########################################
 #
 # This code handles the smbus 
-# communications between the RPi and the
-# MPU9250 IMU. For testing the MPU9250
-# see: imu_test.py
+# communications between the RPi and the MPU6050 IMU. 
+# can also be used with fake modules that read mpu 9250/9265 but do not contain magnetometer.
 #
 #########################################
 #
