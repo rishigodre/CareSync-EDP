@@ -2,6 +2,7 @@ Package                                  Version
 ---------------------------------------- ----------------
 adafruit-circuitpython-ads1x15           
 numpy
-matplotlib
 collections
 gpiozero
+time
+busio
