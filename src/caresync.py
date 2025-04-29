@@ -9,6 +9,8 @@ from adafruit_ads1x15.analog_in import AnalogIn
 from gpiozero import DigitalInputDevice
 from src.mpu6050_i2c import *
 
+SAMPLE_INTERVAL = 0.001 
+
 # function for peak detection 
 def detect_peaks(signal, threshold):
     peaks = []
@@ -32,11 +34,6 @@ def basic_spo2_estimation(ir, red):
         return max(0, min(100, 110 - 15 * ratio))
     return None
 
-# variables using in the calculation of jerk
-oldG = 1
-sampleInterval = 0.001
-fallThreshold = 1500
-
 def main():
     # Setup gpiozero for LO+ and LO- pins
     lo_plus = DigitalInputDevice(14)  # GPIO14 (Pin 8)
@@ -45,10 +42,9 @@ def main():
     # Initialize I2C bus
     i2c = busio.I2C(board.SCL, board.SDA)
 
-    # Initialize ADS1115 ADC
-    adc = ADS1115(i2c)
-    adc.gain = 1  # Gain of 1x (±4.096V range)
-    chan = AnalogIn(adc, 0) # setting the channel for input 
+    # variables using in the calculation of jerk
+    oldG = 1
+    #fallThreshold = 1500
 
     x_len = 500         # Number of points to display
     y_range = 32768     # 16-bit ADC range
@@ -70,6 +66,11 @@ def main():
     red_data = deque(maxlen=500)
     timestamps = deque(maxlen=500)
 
+    # Initialize ADS1115 ADC
+    adc = ADS1115(i2c)
+    adc.gain = 1  # Gain of 1x (±4.096V range)
+    chan = AnalogIn(adc, 0) # setting the channel for input 
+
     try:
         print("Monitoring... Press Ctrl+C to stop.")
         while True:
@@ -81,7 +82,7 @@ def main():
             # calculation of net acceleration in g and Jerk
             netG = ax * ax + ay * ay + az * az
             netG = netG ** 0.5
-            jerkMag = (netG - oldG) / (sampleInterval)
+            jerkMag = (netG - oldG) / (SAMPLE_INTERVAL)
             # direct fall detection using jerk
             # if jerkMag > fallThreshold:
             #     print("fall!!")
@@ -125,7 +126,7 @@ def main():
             ys.append(ecg_value)
             ys = ys[-x_len:]
 
-            time.sleep(sampleInterval)
+            time.sleep(SAMPLE_INTERVAL)
 
     except KeyboardInterrupt:
         print("\nMonitoring stopped.")
