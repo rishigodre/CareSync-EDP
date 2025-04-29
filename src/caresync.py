@@ -7,7 +7,7 @@ import busio
 from adafruit_ads1x15.ads1115 import ADS1115
 from adafruit_ads1x15.analog_in import AnalogIn
 from gpiozero import DigitalInputDevice
-from src.mpu6050_i2c import *
+from mpu6050_i2c import *
 
 SAMPLE_INTERVAL = 0.001 
 
@@ -52,7 +52,7 @@ def main():
     ys = [0] * x_len
 
     # heart rate and SpO2 max30 max30 being enabled 
-    max30 = max30(
+    max30 = MAX30100(
         mode = 0x03,
         sample_rate = 100,
         pulse_width = 1600,
@@ -84,9 +84,9 @@ def main():
             netG = netG ** 0.5
             jerkMag = (netG - oldG) / (SAMPLE_INTERVAL)
             # direct fall detection using jerk
-            # if jerkMag > fallThreshold:
-            #     print("fall!!")
-            #     time.sleep(0.1)
+            if jerkMag > fallThreshold:
+                print("fall!!")
+                time.sleep(0.1)
             oldG = netG
             
             #reading MAX30100 for heart reat and SpO2 
